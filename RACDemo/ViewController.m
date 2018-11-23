@@ -10,7 +10,8 @@
 #import <ReactiveObjC/ReactiveObjC.h>
 #import "DelegateView.h"
 #import "SFIMGCDTimer.h"
-@interface ViewController ()
+
+@interface ViewController () <UIAlertViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UIButton *button1;
 @property (weak, nonatomic) IBOutlet UITextField *textField;
@@ -31,52 +32,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    //    NSMutableArray *temp = [NSMutableArray arrayWithArray:nil];
-
-    //    NSLog(@"temp: %@", temp);
-
-    NSString *str1 = @"=xxxxx";
-    str1 = [str1 stringByReplacingOccurrencesOfString:@"(null)=" withString:@""];
-    NSLog(@"str1: %@", str1);
-
-    self.labelxx = [[UILabel alloc] initWithFrame:CGRectMake(50, 400, 150, 40)];
-    self.labelxx.backgroundColor = [UIColor orangeColor];
-    self.labelxx.textColor = [UIColor whiteColor];
-    [self.view addSubview:self.labelxx];
-
     [self setup];
-    [self addListenEvent];
-}
-
-- (RACSignal *)createSignal {
-    return [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
-        NSLog(@"create signal");
-        [subscriber sendNext:@"xxxx"];
-        return nil;
-    }];
 }
 
 - (void)setup {
-    // 1.创建信号
-    RACSubject *subject = [RACSubject subject];
-
-    // 2.订阅信号
-    [subject subscribeNext:^(id x) {
-        // block调用时刻：当信号发出新值，就会调用.
-        NSLog(@"第一个订阅者%@", x);
-    }];
-
-    [subject subscribeNext:^(id x) {
-        // block调用时刻：当信号发出新值，就会调用.
-        NSLog(@"第二个订阅者%@", x);
-    }];
-
-    // 3.发送信号
-    [subject sendNext:@"1"];
-
-    RACSignal *signal = [self createSignal];
-    NSLog(@"call create signal");
-
     [self.view addSubview:self.delegateView];
     [self.delegateView.btnClickSignal subscribeNext:^(id _Nullable x) {
         NSLog(@"button: %@", x);
@@ -98,38 +57,6 @@
                                                self.dex++;
                                            }];
 
-    NSArray *numbers = @[
-        @"1",
-        @"2",
-        @"3",
-        @"4",
-        @"5",
-        @"6",
-        @"7",
-        @"8",
-        @"9",
-        @"10",
-        @"11",
-        @"12",
-        @"13",
-        @"14",
-        @"15",
-        @"16",
-        @"17",
-        @"18",
-        @"19",
-    ];
-
-    [numbers.rac_sequence.signal subscribeNext:^(id _Nullable x) {
-
-        NSLog(@"x: %@", x);
-    }];
-
-    NSLog(@"start call create signal");
-    [signal subscribeNext:^(id _Nullable x) {
-        NSLog(@"did subscribe");
-    }];
-
     [self testRACSignal];
 
     [self testRACSubject];
@@ -139,6 +66,12 @@
     [self testRACCommand];
 
     [self testRACMulticastConnection];
+
+    [self testRACTupleAndRACSequence];
+
+    [self testRACScheduler];
+
+    [self testListenEvent];
 }
 
 /*
@@ -325,18 +258,111 @@
     [connect connect];
 }
 
-- (void)addListenEvent {
-    // 测试 UIButton 点击事件
-    @weakify(self);
-    [[self.button1 rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl *_Nullable x) {
-        @strongify(self);
-        [self btn1Click:x];
+/*
+ * RACTuple: 元组类，类似NSArray，在解构对象中经常使用
+ * RACSequence: 集合类，使用它来快速遍历数组和字典
+ **/
+- (void)testRACTupleAndRACSequence {
+    NSArray *numbers = @[ @1, @2, @3, @4 ];
+
+    // 这里其实是三步
+    // 第一步: 把数组转换成集合RACSequence numbers.rac_sequence
+    // 第二步: 把集合RACSequence转换RACSignal信号类,numbers.rac_sequence.signal
+    // 第三步: 订阅信号，激活信号，会自动把集合中的所有值，遍历出来。
+    // 注意：这是异步的。
+    [numbers.rac_sequence.signal subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
+    // 会发现先打印了下面这行log，然后地打印上面的遍历
+    NSLog(@"------");
+
+    // 2.遍历字典,遍历出来的键值对会包装成RACTuple(元组对象)
+    NSDictionary *dict = @{ @"name" : @"xmg",
+                            @"age" : @18 };
+    [dict.rac_sequence.signal subscribeNext:^(RACTuple *x) {
+        // 解包元组，会把元组的值，按顺序给参数里面的变量赋值
+        RACTupleUnpack(NSString * key, NSString * value) = x;
+
+        // 相当于以下写法
+        // NSString *key = x[0];
+        // NSString *value = x[1];
+        NSLog(@"%@ %@", key, value);
     }];
 
-    // 测试 通知
-    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"Btn1Click" object:nil] subscribeNext:^(NSNotification *_Nullable x) {
-        NSLog(@"receive notification");
+    NSLog(@"=======");
+}
+
+/*
+ * RACScheduler: RAC中的队列，用GCD封装的
+ * RACUnit: 表⽰stream不包含有意义的值,也就是看到这个，可以直接理解为nil
+ * RACEvent: 把数据包装成信号事件(signal event)。它主要通过RACSignal的 -materialize 来使用，然并卵
+ **/
+- (void)testRACScheduler {
+    self.countDownBtn.enabled = false;
+    self.time = 10;
+
+    // 这个就是RAC中的GCD
+    self.disposable = [[RACSignal interval:1.0 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(NSDate *_Nullable x) {
+        self.time--;
+        NSString *title = self.time > 0 ? [NSString stringWithFormat:@"请等待 %ld 秒后重试", self.time] : @"发送验证码";
+        [self.countDownBtn setTitle:title forState:UIControlStateNormal];
+        self.countDownBtn.enabled = (self.time == 0) ? YES : NO;
+        if (self.time == 0) {
+            // 取消这个订阅
+            [self.disposable dispose];
+        }
     }];
+
+    NSLog(@"RACScheduler start");
+    // 延迟 2 秒后触发
+    [[RACScheduler mainThreadScheduler] afterDelay:2.0
+                                          schedule:^{
+                                              NSLog(@"RACScheduler delay 2");
+                                          }];
+}
+
+/*
+ * 事件监听
+ * 1.代替代理: rac_signalForSelector
+ *
+ * 2.代替KVO: rac_valuesAndChangesForKeyPath
+ *
+ * 3.监听事件: rac_signalForControlEvents
+ *
+ * 4.代替通知：rac_addObserverForName
+ *
+ * 5.监听文本框文字改变：rac_textSignal
+ *
+ * 6.同步信号：rac_liftSelector:withSignalsFromArray:Signals
+ *
+ **/
+
+- (void)testListenEvent {
+    // 之前需要遵守代理协议、赋值delegate、实现代理方法等都不需要，只用rac_signalForSelector就可以实现
+    @weakify(self);
+    [[self rac_signalForSelector:@selector(alertView:clickedButtonAtIndex:)]
+        subscribeNext:^(RACTuple *_Nullable x) {
+            NSLog(@"x: %@", x);
+        }];
+
+    // 监听 UIButton 点击事件
+    [[self.button1 rac_signalForControlEvents:UIControlEventTouchUpInside]
+        subscribeNext:^(__kindof UIControl *_Nullable x) {
+            @strongify(self);
+            [self btn1Click:x];
+        }];
+
+    // 代替KVO
+    [[self.delegateView rac_valuesAndChangesForKeyPath:@"center" options:NSKeyValueObservingOptionNew observer:self]
+        subscribeNext:^(id x) {
+            NSLog(@"%@", x);
+        }];
+
+    // 测试 通知
+    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"Btn1Click" object:nil]
+        subscribeNext:^(NSNotification *_Nullable x) {
+            NSLog(@"receive notification");
+        }];
 
     // 测试 UITextField 内容改变事件
     //    [[self.textField rac_textSignal] subscribeNext:^(NSString *_Nullable value) {
@@ -388,6 +414,27 @@
             }
         }];
     }];
+    
+    // 同步信号：rac_liftSelector:withSignalsFromArray:Signals
+    RACSignal *request1 = [RACSignal createSignal:^RACDisposable *(id subscriber) {
+        // 发送请求1
+        [subscriber sendNext:@"发送请求1"];
+        return nil;
+    }];
+    
+    RACSignal *request2 = [RACSignal createSignal:^RACDisposable *(id subscriber) {
+        // 发送请求2
+        [subscriber sendNext:@"发送请求2"];
+        return nil;
+    }];
+    
+    // 使用注意：几个信号，参数一的方法就几个参数，每个参数对应信号发出的数据。
+    [self rac_liftSelector:@selector(updateUIWithR1:r2:) withSignalsFromArray:@[request1,request2]];
+}
+
+// 更新UI
+- (void)updateUIWithR1:(id)data r2:(id)data1 {
+    NSLog(@"更新UI%@ %@",data,data1);
 }
 
 - (void)btn1Click:(UIButton *)sender {
