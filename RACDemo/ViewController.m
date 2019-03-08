@@ -370,31 +370,31 @@
     //        self.label.text = value;
     //    }];
     // 简写
-    //    RAC(self.label, text) = self.textField.rac_textSignal;
-    //    [[[[self.textField rac_textSignal]
-    //        map:^id _Nullable(NSString *_Nullable value) {
-    //            return @(value.length);
-    //        }] filter:^BOOL(id _Nullable value) {
-    //        return [value integerValue] > 4;
-    //    }] subscribeNext:^(id _Nullable x) {
-    //        // 转换成数字，使用 map 后，信号会被转换
-    //        NSLog(@"x: %@", x);
-    //    }];
-    [[[[[self.textField rac_textSignal] filter:^BOOL(NSString *_Nullable value) {
-        if (value.length) {
-            return YES;
-        } else {
-            return NO;
-        }
-    }] map:^id _Nullable(NSString *_Nullable value) {
-        NSLog(@"map1: %@", value);
-        return @(value.length);
-    }] map:^id _Nullable(id _Nullable value) {
-        NSLog(@"map2: %@", value);
-        return value;
-    }] subscribeNext:^(id _Nullable x) {
-        NSLog(@"x: %@", x);
-    }];
+        RAC(self.label, text) = self.textField.rac_textSignal;
+//        [[[[self.textField rac_textSignal]
+//            map:^id _Nullable(NSString *_Nullable value) {
+//                return @(value.length);
+//            }] filter:^BOOL(id _Nullable value) {
+//            return [value integerValue] > 4;
+//        }] subscribeNext:^(id _Nullable x) {
+//            // 转换成数字，使用 map 后，信号会被转换
+//            NSLog(@"x: %@", x);
+//        }];
+//    [[[[[self.textField rac_textSignal] filter:^BOOL(NSString *_Nullable value) {
+//        if (value.length) {
+//            return YES;
+//        } else {
+//            return NO;
+//        }
+//    }] map:^id _Nullable(NSString *_Nullable value) {
+//        NSLog(@"map1: %@", value);
+//        return @(value.length);
+//    }] map:^id _Nullable(id _Nullable value) {
+//        NSLog(@"map2: %@", value);
+//        return value;
+//    }] subscribeNext:^(id _Nullable x) {
+//        NSLog(@"x: %@", x);
+//    }];
 
     // 按钮倒计时
     [[self.countDownBtn rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl *_Nullable x) {
