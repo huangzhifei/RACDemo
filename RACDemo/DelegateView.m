@@ -33,12 +33,14 @@
     @weakify(self);
     [[self.btn rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(__kindof UIControl *_Nullable x) {
         @strongify(self);
-        [self.btnClickSignal sendNext:@"我在代理"];
-        CGFloat r = random() % 255;
-        CGFloat g = random() % 255;
-        CGFloat b = random() % 255;
-        self.backgroundColor = [UIColor colorWithRed:r / 255 green:g / 255 blue:b / 255 alpha:1.0];
+        [self buttonClick:self.btn];
+//        [self.btnClickSignal sendNext:@"我在代理"];
+//        CGFloat r = random() % 255;
+//        CGFloat g = random() % 255;
+//        CGFloat b = random() % 255;
+//        self.backgroundColor = [UIColor colorWithRed:r / 255 green:g / 255 blue:b / 255 alpha:1.0];
     }];
+    //[self.btn addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] init];
     [self.label addGestureRecognizer:tap];
 
@@ -50,6 +52,10 @@
         CGFloat b = random() % 255;
         self.label.backgroundColor = [UIColor colorWithRed:r / 255 green:g / 255 blue:b / 255 alpha:1.0];
     }];
+}
+
+- (void)buttonClick:(UIButton *)sender {
+    NSLog(@"xxxxxx");
 }
 
 #pragma mark - Setter & Getter

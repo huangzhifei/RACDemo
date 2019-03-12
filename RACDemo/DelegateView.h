@@ -15,7 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) RACSubject *btnClickSignal;
 @property (nonatomic, strong) RACSubject *labelClickSignal;
-@property (nonatomic, strong) NSString *center;
 
 @end
 
