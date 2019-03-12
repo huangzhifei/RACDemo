@@ -86,6 +86,7 @@
     @weakify(self);
     [[self.delegateView rac_signalForSelector:@selector(buttonClick:)] subscribeNext:^(RACTuple *_Nullable x) {
         NSLog(@"button2: %@", x);
+        UIButton *btn = (UIButton *)x[0];
         @strongify(self);
         self.delegateView.backgroundColor = [UIColor orangeColor];
     }];
