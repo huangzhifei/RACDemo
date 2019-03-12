@@ -1,16 +1,22 @@
 PODS:
   - ReactiveObjC (3.1.0)
+  - SDWebImage (4.4.6):
+    - SDWebImage/Core (= 4.4.6)
+  - SDWebImage/Core (4.4.6)
 
 DEPENDENCIES:
   - ReactiveObjC (~> 3.1.0)
+  - SDWebImage
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - ReactiveObjC
+    - SDWebImage
 
 SPEC CHECKSUMS:
   ReactiveObjC: 2a38ea15335de4119d8b17caf1db1484f61db902
+  SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
 
-PODFILE CHECKSUM: 57959001e0c6c1a0b45ff060f2687a50a0c6adb2
+PODFILE CHECKSUM: 217b176d14e6a461f14146d885058a743945b469
 
 COCOAPODS: 1.5.3

@@ -10,6 +10,8 @@
 #import <ReactiveObjC/ReactiveObjC.h>
 #import "DelegateView.h"
 #import "SFIMGCDTimer.h"
+#import "UIView+WebCache.h"
+
 @interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet UIButton *button1;
@@ -82,7 +84,7 @@
         NSLog(@"button: %@", x);
     }];
     @weakify(self);
-    [[self.delegateView rac_signalForSelector:@selector(buttonClick:)] subscribeNext:^(RACTuple * _Nullable x) {
+    [[self.delegateView rac_signalForSelector:@selector(buttonClick:)] subscribeNext:^(RACTuple *_Nullable x) {
         NSLog(@"button2: %@", x);
         @strongify(self);
         self.delegateView.backgroundColor = [UIColor orangeColor];
@@ -145,15 +147,16 @@
     [self testRACCommand];
 
     [self testRACMulticastConnection];
-    
+
     [[self.delegateView rac_valuesAndChangesForKeyPath:@"backgroundColor"
-                                               options:NSKeyValueObservingOptionNew observer:nil]
-     subscribeNext:^(id x) {
-         NSLog(@"self.delegateView: %@",x);
-    }];
-    
+                                               options:NSKeyValueObservingOptionNew
+                                              observer:nil]
+        subscribeNext:^(id x) {
+            NSLog(@"self.delegateView: %@", x);
+        }];
+
     [self testLiftSignals];
-    
+
     [self testAdvanced];
 }
 
@@ -161,31 +164,23 @@
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         double delayInSeconds = 2.0;
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void) {
             [subscriber sendNext:@"A"];
-            dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void) {
                 [subscriber sendNext:@"AA"];
             });
         });
         return nil;
     }];
-    
+
     RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"B"];
         [subscriber sendNext:@"Another B"];
         [subscriber sendCompleted];
         return nil;
     }];
-    
+
     [self rac_liftSelector:@selector(doA:withB:) withSignals:signalA, signalB, nil];
-    
-    [[self.textField.rac_textSignal bind:^RACSignalBindBlock _Nonnull{
-        return ^RACSignal*(id value, BOOL *stop) {
-            return [RACSignal return:[NSString stringWithFormat:@"hello: %@", value]];
-        };
-    }] subscribeNext:^(id  _Nullable x) {
-        NSLog(@"value %@", x);
-    }];
 }
 
 - (void)doA:(NSString *)A withB:(NSString *)B {
@@ -194,53 +189,66 @@
 
 - (void)testAdvanced {
     [self testConcat];
-    
+    [self testBind];
     [self testThen];
     [self testMerge];
     [self testCombineLatest];
+    [self testReduce];
+    [self testDelay];
+}
+
+- (void)testBind {
+    [[self.textField.rac_textSignal bind:^RACSignalBindBlock _Nonnull {
+        return ^RACSignal *(id value, BOOL *stop) {
+            // 做好处理，通过信号返回出去.
+            return [RACSignal return:[NSString stringWithFormat:@"hello: %@", value]];
+        };
+    }] subscribeNext:^(id _Nullable x) {
+        NSLog(@"bind content: %@", x); // hello: xxxxx
+    }];
 }
 
 - (void)testConcat {
     // 创建两个信号 signalA 和 signalB
-    RACSignal *signalA = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
         NSLog(@"signalA sendNext");
         [subscriber sendNext:@"A"];
         [subscriber sendNext:@"AA"];
         [subscriber sendCompleted];
         return nil;
     }];
-    
-    RACSignal *signalB = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
         NSLog(@"signalB sendNext");
         [subscriber sendNext:@"B"];
         [subscriber sendCompleted];
         return nil;
     }];
-    
+
     // 把signalA拼接到signalB后，signalA发送完成，signalB才会被激活
-    [[signalA concat:signalB] subscribeNext:^(id  _Nullable x) {
+    [[signalA concat:signalB] subscribeNext:^(id _Nullable x) {
         NSLog(@"contact :%@", x);
     }];
 }
 
 - (void)testThen {
-    [[[RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
         [subscriber sendNext:@"test1"];
         [subscriber sendCompleted];
         return nil;
-    }] then:^RACSignal * _Nonnull{
-        return [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+    }] then:^RACSignal *_Nonnull {
+        return [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
             [subscriber sendNext:@"test2"];
             return nil;
         }];
-    }] subscribeNext:^(id  _Nullable x) {
+    }] subscribeNext:^(id _Nullable x) {
         // 只能接收到第二个信号的值，也就是then返回信号的值
         NSLog(@"then content: %@", x);
     }];
 }
 
 - (void)testMerge {
-    RACSignal *signalA = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
         [subscriber sendNext:@"merge signal 1"];
         [subscriber sendCompleted];
         return nil;
@@ -251,16 +259,16 @@
         [subscriber sendCompleted];
         return nil;
     }];
-    
+
     // 合并信号,任何一个信号发送数据，都能监听到.
     RACSignal *mergeSignal = [signalA merge:signalB];
-    [mergeSignal subscribeNext:^(id  _Nullable x) {
+    [mergeSignal subscribeNext:^(id _Nullable x) {
         NSLog(@"merge content: %@", x);
     }];
 }
 
 - (void)testCombineLatest {
-    RACSignal *signalA = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
         [subscriber sendNext:@"combineLatest signal 1"];
         [subscriber sendCompleted];
         return nil;
@@ -271,13 +279,58 @@
         [subscriber sendCompleted];
         return nil;
     }];
-    
+
     // 把两个信号组合成一个信号,跟zip一样，没什么区别
     RACSignal *combineSignal = [signalA combineLatestWith:signalB];
-    
+
     [combineSignal subscribeNext:^(id x) {
-        NSLog(@"combineLatest content: %@",x); // (combineLatest signal 1, combineLatest signal 2)
+        NSLog(@"combineLatest content: %@", x); // (combineLatest signal 1, combineLatest signal 2)
     }];
+}
+
+- (void)testReduce {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"reduce signalA"];
+        return nil;
+    }];
+
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"reduce signalB"];
+        return nil;
+    }];
+
+    RACSignal *signalC = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"reduce signalC"];
+        return nil;
+    }];
+
+    // reduceblock的返回值：聚合信号之后的内容。
+    RACSignal *reduceSignal = [RACSignal combineLatest:@[ signalA, signalB, signalC ]
+                                                reduce:^id(NSNumber *num1, NSNumber *num2, NSNumber *num3) {
+                                                    return [NSString stringWithFormat:@"%@ %@ %@", num1, num2, num3];
+                                                }];
+
+    [reduceSignal subscribeNext:^(id x) {
+        NSLog(@"reduce content: %@", x); // (reduce signalA, reduce signalB, reduce signalC)
+    }];
+}
+
+- (void)testDelay {
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        NSLog(@"delay signal start send");
+        [subscriber sendNext:@"delay signal"];
+        return nil;
+    }] delay:2.0] subscribeNext:^(id _Nullable x) {
+        NSLog(@"delay 2 second receive signal");
+    }];
+
+    NSLog(@"eric 1111");
+    dispatch_main_async_safe(^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"eric 2222");
+        });
+        NSLog(@"eric 33333");
+    });
 }
 
 /*
