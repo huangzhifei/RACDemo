@@ -83,10 +83,11 @@
     [self.delegateView.btnClickSignal subscribeNext:^(id _Nullable x) {
         NSLog(@"button: %@", x);
     }];
+
     @weakify(self);
     [[self.delegateView rac_signalForSelector:@selector(buttonClick:)] subscribeNext:^(RACTuple *_Nullable x) {
         NSLog(@"button2: %@", x);
-        UIButton *btn = (UIButton *)x[0];
+        UIButton *btn = (UIButton *) x[0];
         @strongify(self);
         self.delegateView.backgroundColor = [UIColor orangeColor];
     }];
@@ -196,6 +197,9 @@
     [self testCombineLatest];
     [self testReduce];
     [self testDelay];
+    [self testTake];
+    [self testSkip];
+    [self testTakeUntil];
 }
 
 - (void)testBind {
@@ -332,6 +336,57 @@
         });
         NSLog(@"eric 33333");
     });
+}
+
+- (void)testTake {
+    // 取前 N 个
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        [subscriber sendNext:@"signal 1"];
+        [subscriber sendNext:@"signal 2"];
+        [subscriber sendNext:@"signal 3"];
+        [subscriber sendCompleted];
+        return nil;
+    }] take:2] subscribeNext:^(id _Nullable x) {
+        NSLog(@"take content: %@", x); // only 1 and 2 will be print
+    }];
+}
+
+- (void)testSkip {
+    // 跳过前 N 个
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        [subscriber sendNext:@"signal 1"];
+        [subscriber sendNext:@"signal 2"];
+        [subscriber sendNext:@"signal 3"];
+        [subscriber sendCompleted];
+        return nil;
+    }] skip:2] subscribeNext:^(id _Nullable x) {
+        NSLog(@"skip : %@", x); // only 3 will be print
+    }];
+}
+
+- (void)testTakeUntil {
+    // RAC 这个消息是2秒后完成, 所以 signal1 signal2 这两个消息是可以发送到 而3秒后的 signal3 signal4 就不会发送.
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        [subscriber sendNext:@"signal1"];
+        [subscriber sendNext:@"signal2"];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [subscriber sendNext:@"signal3"];
+            [subscriber sendNext:@"signal4"];
+            [subscriber sendCompleted];
+        });
+        [subscriber sendCompleted];
+        return nil;
+    }] takeUntil:[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+               [subscriber sendNext:@"RAC"];
+               [subscriber sendCompleted];
+           });
+           return nil;
+       }]];
+
+    [signal subscribeNext:^(id _Nullable x) {
+        NSLog(@"takeUntil: %@", x); // only signal1 & signal2 will be print
+    }];
 }
 
 /*
