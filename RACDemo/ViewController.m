@@ -200,6 +200,7 @@
     [self testTake];
     [self testSkip];
     [self testTakeUntil];
+    [self testTakeLast];
 }
 
 - (void)testBind {
@@ -386,6 +387,24 @@
 
     [signal subscribeNext:^(id _Nullable x) {
         NSLog(@"takeUntil: %@", x); // only signal1 & signal2 will be print
+    }];
+}
+
+- (void)testTakeLast {
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"signal1"];
+        [subscriber sendNext:@"signal2"];
+        [subscriber sendNext:@"signal3"];
+        [subscriber sendNext:@"signal4"];
+        [subscriber sendCompleted];
+        // 上面调用 sendCompleted 之后，会直接进入下面的订阅回调，打印最后 3 条信号，然后在打印下面的 "send completed"
+        NSLog(@"send completed");
+        return nil;
+
+    }] takeLast:3];
+
+    [signal subscribeNext:^(id x) {
+        NSLog(@"testTakeLast : %@",x);
     }];
 }
 
