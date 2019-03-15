@@ -201,6 +201,7 @@
     [self testSkip];
     [self testTakeUntil];
     [self testTakeLast];
+    [self testDistinctUntilChanged];
 }
 
 - (void)testBind {
@@ -406,6 +407,25 @@
     [signal subscribeNext:^(id x) {
         NSLog(@"testTakeLast : %@",x);
     }];
+}
+
+- (void)testDistinctUntilChanged {
+    RACSubject *signal = [RACSubject subject];
+    [[signal distinctUntilChanged] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"distinctUntilChanged : %@", x); // will only print "eric", "eric hzf", "eric"
+    }];
+    
+    // 发送一次信号，内容为 eric
+    [signal sendNext:@"eric"];
+    
+    // 发送二次信号，内容依然为 eric，但是使用 distinctUntilChanged 后不会在接收与上一次重复的内容
+    [signal sendNext:@"eric"];
+    
+    // 发送三次信号，内容为 eric hzf
+    [signal sendNext:@"eric hzf"];
+    
+    // 发送四次信号，内容为 eric hzf
+    [signal sendNext:@"eric"];
 }
 
 /*
