@@ -202,6 +202,7 @@
     [self testTakeUntil];
     [self testTakeLast];
     [self testDistinctUntilChanged];
+    [self testSwitchToLatest];
 }
 
 - (void)testBind {
@@ -405,27 +406,42 @@
     }] takeLast:3];
 
     [signal subscribeNext:^(id x) {
-        NSLog(@"testTakeLast : %@",x);
+        NSLog(@"testTakeLast : %@", x);
     }];
 }
 
 - (void)testDistinctUntilChanged {
     RACSubject *signal = [RACSubject subject];
-    [[signal distinctUntilChanged] subscribeNext:^(id  _Nullable x) {
+    [[signal distinctUntilChanged] subscribeNext:^(id _Nullable x) {
         NSLog(@"distinctUntilChanged : %@", x); // will only print "eric", "eric hzf", "eric"
     }];
-    
+
     // 发送一次信号，内容为 eric
     [signal sendNext:@"eric"];
-    
+
     // 发送二次信号，内容依然为 eric，但是使用 distinctUntilChanged 后不会在接收与上一次重复的内容
     [signal sendNext:@"eric"];
-    
+
     // 发送三次信号，内容为 eric hzf
     [signal sendNext:@"eric hzf"];
-    
+
     // 发送四次信号，内容为 eric hzf
     [signal sendNext:@"eric"];
+}
+
+- (void)testSwitchToLatest {
+    RACSubject *signalOfSignals = [RACSubject subject];
+    RACSubject *signalA = [RACSubject subject];
+    RACSubject *signalB = [RACSubject subject];
+    // 获取信号中信号最近发出信号，订阅最近发出的信号。
+    // 注意switchToLatest：只能用于信号中的信号
+    [signalOfSignals.switchToLatest subscribeNext:^(id x) {
+        NSLog(@"switchToLatest: %@", x); // will only print signalB
+    }];
+    [signalOfSignals sendNext:signalA];
+    [signalOfSignals sendNext:signalB];
+    [signalA sendNext:@"signalA"];
+    [signalB sendNext:@"signalB"];
 }
 
 /*
