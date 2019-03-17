@@ -204,6 +204,11 @@
     [self testDistinctUntilChanged];
     [self testSwitchToLatest];
     [self testThrottle];
+    [self testTimeout];
+    [self testDoNextAndDoCompleted];
+    [self testRetry];
+    [self testReplay];
+    [self testRepeat];
 }
 
 - (void)testBind {
@@ -474,6 +479,60 @@
     });
 }
 
+- (void)testTimeout {
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+
+        //无任何操作 等超时
+
+        //        [subscriber sendNext:@"signal A"];
+        //        NSError *error = [[NSError alloc]initWithDomain:@"unknwn domain" code:600 userInfo:@{@"error":@"超时"}];
+        //        [subscriber sendError:error];
+        //        [subscriber sendCompleted];
+        return nil;
+    }] timeout:3.0
+        onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id _Nullable x) {
+        NSLog(@"timeout :%@", x); // 超时后不会进入到这里
+    }
+        error:^(NSError *_Nullable error) {
+            NSLog(@"timeout 超时: %@", error); // 3 秒超时后，会打印超时错误
+        }];
+}
+
+- (void)testDoNextAndDoCompleted {
+    [[[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        NSLog(@"testDoNextAndDoCompleted start sendNext");
+        [subscriber sendNext:@"hello do next"];
+        NSLog(@"testDoNextAndDoCompleted end sendNext");
+
+        NSLog(@"testDoNextAndDoCompleted start sendCompleted");
+        [subscriber sendCompleted];
+        NSLog(@"testDoNextAndDoCompleted end sendCompleted");
+
+        return nil;
+    }] doNext:^(id _Nullable x) {
+        // 在执行 [subscriber sendNext:@"hello do next"]; 之前会先执行 doNext：
+        NSLog(@"test do next");
+    }] doCompleted:^{
+        // 在执行 [subscriber sendCompleted]; 之前会先执行 doCompleted：
+        NSLog(@"test do completed");
+    }] subscribeNext:^(id _Nullable x) {
+        NSLog(@"testDoNextAndDoCompleted: %@", x);
+    }];
+
+    /*
+     最终打印顺序：
+     
+     testDoNextAndDoCompleted start sendNext
+     test do next
+     testDoNextAndDoCompleted: hello do next
+     testDoNextAndDoCompleted end sendNext
+     testDoNextAndDoCompleted start sendCompleted
+     test do completed
+     testDoNextAndDoCompleted end sendCompleted
+
+     **/
+}
+
 /*
  * RACSignal使用注意
  * 一、创建信号，首先把didSubscribe保存到信号中，还不会触发。
@@ -512,6 +571,82 @@
     [siganl subscribeNext:^(id x) {
         // block调用时刻：每当有信号发出数据，就会调用block.
         NSLog(@"接收到数据:%@", x);
+    }];
+}
+
+- (void)testRetry {
+    // 重试，不执行 error block，一直到执行 sendNext 成功才结束
+    __block NSInteger count = 1;
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            if (count == 5) {
+                [subscriber sendNext:@"retry 执行 sendNext 成功"];
+                [subscriber sendCompleted];
+            } else {
+                // 注意：这里一定要发送一个错误信号，不然就不会继续往下面走，也就永远不会达到错误重试的次数和效果
+                // 但是这个 error 是不会被下面的 error：订阅到的，也就是说不会触发下面那个 error：的监听
+                [subscriber sendError:[NSError errorWithDomain:@"unknown domain"
+                                                          code:500
+                                                      userInfo:@{
+                                                          @"msg" : [NSString stringWithFormat:@"次数：%ld", count]
+                                                      }]];
+            }
+            ++count;
+        });
+        return nil;
+    }] retry:6] subscribeNext:^(id _Nullable x) {
+        NSLog(@"retry: %@", x);
+    }
+        error:^(NSError *_Nullable error) {
+            NSLog(@"retry error: %@", error);
+        }];
+}
+
+- (void)testReplay {
+    __block NSInteger count = 1; // 副作用
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:[NSString stringWithFormat:@"signal A with count = %ld", count]];
+        ++count;
+        [subscriber sendNext:[NSString stringWithFormat:@"signal B with count = %ld", count]];
+        ++count;
+        return nil;
+    }] replay];
+
+    [signal subscribeNext:^(id x) {
+        NSLog(@"test replay 订阅1: %@", x);
+    }];
+
+    [signal subscribeNext:^(id x) {
+        NSLog(@"test replay 订阅2: %@", x);
+    }];
+
+    // 使用 replay 打印输出：
+    /*
+     test replay 订阅1: signal A with count = 1
+     test replay 订阅1: signal B with count = 2
+     test replay 订阅2: signal A with count = 1
+     test replay 订阅2: signal B with count = 2
+     **/
+
+    // 不使用 replay 打印输出：
+    /*
+     test replay 订阅1: signal A with count = 1
+     test replay 订阅1: signal B with count = 2
+     test replay 订阅2: signal A with count = 3
+     test replay 订阅2: signal B with count = 4
+     **/
+}
+
+- (void)testRepeat {
+    RACSignal *signal = [RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        [subscriber sendNext:@"signal A"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    // 使用 repeat 之后，将无限循环的接收信号
+    [[[signal delay:1.0] repeat] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"testRepeat: %@", x); // 无限循环打印：testRepeat: signal A
     }];
 }
 
