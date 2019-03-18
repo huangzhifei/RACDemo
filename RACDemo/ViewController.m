@@ -212,6 +212,7 @@
     [self testStartWith];
     [self testZipWith];
     [self testZip];
+    [self testCommand];
 }
 
 - (void)testBind {
@@ -747,6 +748,33 @@
      "signal C1"
      )
      **/
+}
+
+- (void)testCommand {
+    RACCommand *command = [[RACCommand alloc] initWithSignalBlock:^RACSignal * _Nonnull(NSNumber * _Nullable input) {
+        return [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+            NSInteger integer = [input integerValue];
+            for (NSInteger i = 0; i < integer; i++) {
+                [subscriber sendNext:@(i)];
+            }
+            [subscriber sendCompleted];
+            return nil;
+        }];
+    }];
+    [[command.executionSignals switchToLatest] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"command: %@", x);
+    }];
+    
+    [command execute:@1];
+//    [command execute:@2];
+    [RACScheduler.mainThreadScheduler afterDelay:0.1
+                                        schedule:^{
+                                            [command execute:@2];
+                                        }];
+    [RACScheduler.mainThreadScheduler afterDelay:0.2
+                                        schedule:^{
+                                            [command execute:@3];
+                                        }];
 }
 
 /*
