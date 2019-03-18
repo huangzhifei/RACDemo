@@ -9,8 +9,8 @@
 #import "ViewController.h"
 #import <ReactiveObjC/ReactiveObjC.h>
 #import "DelegateView.h"
-#import "SFIMGCDTimer.h"
 #import "UIView+WebCache.h"
+#import <HZFGCDTimer/HZFGCDTimer.h>
 
 @interface ViewController ()
 
@@ -101,7 +101,7 @@
         [self.arr addObject:value];
     }
     self.dex = 0;
-    [SFIMGCDTimer scheduledTimerWithTimeInterval:0.01
+    [HZFGCDTimer scheduledTimerWithTimeInterval:0.01
                                          repeats:NO
                                            block:^{
                                                self.labelxx.text = self.arr[self.dex];
