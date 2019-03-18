@@ -209,6 +209,9 @@
     [self testRetry];
     [self testReplay];
     [self testRepeat];
+    [self testStartWith];
+    [self testZipWith];
+    [self testZip];
 }
 
 - (void)testBind {
@@ -643,11 +646,107 @@
         [subscriber sendCompleted];
         return nil;
     }];
-    
+
     // 使用 repeat 之后，将无限循环的接收信号
-    [[[signal delay:1.0] repeat] subscribeNext:^(id  _Nullable x) {
+    [[[signal delay:5.0] repeat] subscribeNext:^(id _Nullable x) {
         NSLog(@"testRepeat: %@", x); // 无限循环打印：testRepeat: signal A
     }];
+}
+
+- (void)testStartWith {
+    [[[RACSignal createSignal:^RACDisposable *_Nullable(id<RACSubscriber> _Nonnull subscriber) {
+        [subscriber sendNext:@"signal A"];
+        [subscriber sendCompleted];
+        return nil;
+    }] startWith:@"start with"] subscribeNext:^(id _Nullable x) {
+        NSLog(@"testStartWith: %@", x); // 先打印：testStartWith: start with 然后在打印：testStartWith: signal A
+    }];
+}
+
+- (void)testZipWith {
+    RACSubject *subjectA = [RACSubject subject];
+    RACSubject *subjectB = [RACSubject subject];
+
+    RACSignal *zipSignal = [subjectA zipWith:subjectB];
+    [zipSignal subscribeNext:^(id _Nullable x) {
+        NSLog(@"testZipWith: %@", x); // 这里会压缩成一个元组
+    }];
+
+    [subjectA sendNext:@"subjectA 1"];
+    [subjectA sendNext:@"subjectA 2"];
+    [subjectA sendNext:@"subjectA 3"];
+
+    [subjectB sendNext:@"subjectB 1"];
+    [subjectB sendNext:@"subjectB 2"];
+
+    // 打印
+    // 1: 当 subjectB 只发送了一个信号 @"subjectB 1"，他只会消耗 subjectA 一个信号 @"subjectA 1"，所以 subjectA 之后的两个信号是没法被消耗的。
+    /*
+     testZipWith: <RACTwoTuple: 0x600001983eb0> (
+     "subjectA 1",
+     "subjectB 1"
+     )
+     **/
+
+    // 2: 如果 subjectB 发送了两个信号 @"subjectB 1"、@"subjectB 2"，他相应的就会消耗 subjectA 的两个信号。
+    /*
+     testZipWith: <RACTwoTuple: 0x600003ef1460> (
+     "subjectA 1",
+     "subjectB 1"
+     )
+     
+     testZipWith: <RACTwoTuple: 0x600003eec180> (
+     "subjectA 2",
+     "subjectB 2"
+     )
+     **/
+}
+
+- (void)testZip {
+    RACSignal *signalA = [RACSignal createSignal:
+                                       ^RACDisposable *(id<RACSubscriber> subscriber) {
+                                           [subscriber sendNext:@"signal A1"];
+                                           [subscriber sendNext:@"signal A2"];
+                                           [subscriber sendCompleted];
+                                           return [RACDisposable disposableWithBlock:^{
+                                               NSLog(@"signalA dispose");
+                                           }];
+                                       }];
+
+    RACSignal *signalB = [RACSignal createSignal:
+                                        ^RACDisposable *(id<RACSubscriber> subscriber) {
+                                            [subscriber sendNext:@"signal B1"];
+                                            [subscriber sendNext:@"signal B2"];
+                                            [subscriber sendNext:@"signal B3"];
+                                            [subscriber sendCompleted];
+                                            return [RACDisposable disposableWithBlock:^{
+                                                NSLog(@"signalB dispose");
+                                            }];
+                                        }];
+    
+    RACSignal *signalC = [RACSignal createSignal:
+                          ^RACDisposable *(id<RACSubscriber> subscriber) {
+                              [subscriber sendNext:@"signal C1"];
+//                              [subscriber sendNext:@"signal C2"];
+                              [subscriber sendCompleted];
+                              return [RACDisposable disposableWithBlock:^{
+                                  NSLog(@"signalC dispose");
+                              }];
+                          }];
+
+    [[RACSignal zip:@[ signalA, signalB, signalC ]] subscribeNext:^(id x) {
+        NSLog(@"testZip: %@", x); // 打印元组 RACTuple
+    }];
+    
+    // 打印
+    // 因为 signalC 只发出了一个信号，所以没法消耗掉其他的，只会有一组打印
+    /*
+     testZip: <RACTuple: 0x6000039c3e50> (
+     "signal A1",
+     "signal B1",
+     "signal C1"
+     )
+     **/
 }
 
 /*
