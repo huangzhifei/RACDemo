@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		75385264223F4E7200AA1C55 /* RACCommandViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75385263223F4E7200AA1C55 /* RACCommandViewController.m */; };
+		75672B90224364C000299059 /* BaseInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 75672B8F224364C000299059 /* BaseInstance.m */; };
+		75672B932243653200299059 /* AInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 75672B922243653200299059 /* AInstance.m */; };
+		75672B962243654800299059 /* BInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 75672B952243654800299059 /* BInstance.m */; };
 		75A14E00218C2B1300909F3A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A14DFF218C2B1300909F3A /* AppDelegate.m */; };
 		75A14E03218C2B1300909F3A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A14E02218C2B1300909F3A /* ViewController.m */; };
 		75A14E06218C2B1300909F3A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 75A14E04218C2B1300909F3A /* Main.storyboard */; };
@@ -43,6 +46,12 @@
 		51920534E56C618CFAB94152 /* Pods-RACDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RACDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RACDemo/Pods-RACDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		75385262223F4E7200AA1C55 /* RACCommandViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RACCommandViewController.h; sourceTree = "<group>"; };
 		75385263223F4E7200AA1C55 /* RACCommandViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RACCommandViewController.m; sourceTree = "<group>"; };
+		75672B8E224364C000299059 /* BaseInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BaseInstance.h; sourceTree = "<group>"; };
+		75672B8F224364C000299059 /* BaseInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BaseInstance.m; sourceTree = "<group>"; };
+		75672B912243653200299059 /* AInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AInstance.h; sourceTree = "<group>"; };
+		75672B922243653200299059 /* AInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AInstance.m; sourceTree = "<group>"; };
+		75672B942243654800299059 /* BInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BInstance.h; sourceTree = "<group>"; };
+		75672B952243654800299059 /* BInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BInstance.m; sourceTree = "<group>"; };
 		75A14DFB218C2B1300909F3A /* RACDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RACDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		75A14DFE218C2B1300909F3A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		75A14DFF218C2B1300909F3A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -127,6 +136,12 @@
 				75A14E09218C2B1500909F3A /* LaunchScreen.storyboard */,
 				75A14E0C218C2B1500909F3A /* Info.plist */,
 				75A14E0D218C2B1500909F3A /* main.m */,
+				75672B8E224364C000299059 /* BaseInstance.h */,
+				75672B8F224364C000299059 /* BaseInstance.m */,
+				75672B912243653200299059 /* AInstance.h */,
+				75672B922243653200299059 /* AInstance.m */,
+				75672B942243654800299059 /* BInstance.h */,
+				75672B952243654800299059 /* BInstance.m */,
 			);
 			path = RACDemo;
 			sourceTree = "<group>";
@@ -352,6 +367,9 @@
 				75A14E0E218C2B1500909F3A /* main.m in Sources */,
 				75A14E00218C2B1300909F3A /* AppDelegate.m in Sources */,
 				75A14E32218C340A00909F3A /* DelegateView.m in Sources */,
+				75672B962243654800299059 /* BInstance.m in Sources */,
+				75672B90224364C000299059 /* BaseInstance.m in Sources */,
+				75672B932243653200299059 /* AInstance.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

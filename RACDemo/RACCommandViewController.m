@@ -14,6 +14,10 @@
 
 @implementation RACCommandViewController
 
++ (void)load {
+    NSLog(@"RACCommandViewController");
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     

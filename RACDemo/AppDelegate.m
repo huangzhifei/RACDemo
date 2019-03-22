@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import "AInstance.h"
+#import "BInstance.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +19,17 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    NSLog(@" =================================== ");
+    
+    BaseInstance *base = [BaseInstance shareInstance];
+    NSLog(@"base: %@", base);
+    AInstance *a = [AInstance shareInstance];
+    NSLog(@"a: %@", a);
+    BInstance *b = [BInstance shareInstance];
+    NSLog(@"b: %@", b);
+    
+    NSLog(@" =================================== ");
     return YES;
 }
 
