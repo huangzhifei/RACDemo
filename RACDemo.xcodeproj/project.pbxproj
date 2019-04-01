@@ -20,6 +20,9 @@
 		75A14E18218C2B1600909F3A /* RACDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A14E17218C2B1600909F3A /* RACDemoTests.m */; };
 		75A14E23218C2B1600909F3A /* RACDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A14E22218C2B1600909F3A /* RACDemoUITests.m */; };
 		75A14E32218C340A00909F3A /* DelegateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A14E31218C340A00909F3A /* DelegateView.m */; };
+		75F1C71E225208A30052D423 /* ViewController+AViewControllerCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 75F1C71D225208A30052D423 /* ViewController+AViewControllerCategory.m */; };
+		75F1C721225208D80052D423 /* NSObject+InvokeOriginalMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = 75F1C720225208D80052D423 /* NSObject+InvokeOriginalMethod.m */; };
+		75F1C72422520C5C0052D423 /* ViewController+BViewControllerCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 75F1C72322520C5C0052D423 /* ViewController+BViewControllerCategory.m */; };
 		B5CB637418AB87EB358FC8D2 /* Pods_RACDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01DF19043649D764B477AE5B /* Pods_RACDemo.framework */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +73,12 @@
 		75A14E24218C2B1600909F3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		75A14E30218C340A00909F3A /* DelegateView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DelegateView.h; sourceTree = "<group>"; };
 		75A14E31218C340A00909F3A /* DelegateView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DelegateView.m; sourceTree = "<group>"; };
+		75F1C71C225208A30052D423 /* ViewController+AViewControllerCategory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ViewController+AViewControllerCategory.h"; sourceTree = "<group>"; };
+		75F1C71D225208A30052D423 /* ViewController+AViewControllerCategory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ViewController+AViewControllerCategory.m"; sourceTree = "<group>"; };
+		75F1C71F225208D80052D423 /* NSObject+InvokeOriginalMethod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSObject+InvokeOriginalMethod.h"; sourceTree = "<group>"; };
+		75F1C720225208D80052D423 /* NSObject+InvokeOriginalMethod.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSObject+InvokeOriginalMethod.m"; sourceTree = "<group>"; };
+		75F1C72222520C5C0052D423 /* ViewController+BViewControllerCategory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ViewController+BViewControllerCategory.h"; sourceTree = "<group>"; };
+		75F1C72322520C5C0052D423 /* ViewController+BViewControllerCategory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ViewController+BViewControllerCategory.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +151,12 @@
 				75672B922243653200299059 /* AInstance.m */,
 				75672B942243654800299059 /* BInstance.h */,
 				75672B952243654800299059 /* BInstance.m */,
+				75F1C71C225208A30052D423 /* ViewController+AViewControllerCategory.h */,
+				75F1C71D225208A30052D423 /* ViewController+AViewControllerCategory.m */,
+				75F1C71F225208D80052D423 /* NSObject+InvokeOriginalMethod.h */,
+				75F1C720225208D80052D423 /* NSObject+InvokeOriginalMethod.m */,
+				75F1C72222520C5C0052D423 /* ViewController+BViewControllerCategory.h */,
+				75F1C72322520C5C0052D423 /* ViewController+BViewControllerCategory.m */,
 			);
 			path = RACDemo;
 			sourceTree = "<group>";
@@ -365,9 +380,12 @@
 				75A14E03218C2B1300909F3A /* ViewController.m in Sources */,
 				75385264223F4E7200AA1C55 /* RACCommandViewController.m in Sources */,
 				75A14E0E218C2B1500909F3A /* main.m in Sources */,
+				75F1C71E225208A30052D423 /* ViewController+AViewControllerCategory.m in Sources */,
+				75F1C72422520C5C0052D423 /* ViewController+BViewControllerCategory.m in Sources */,
 				75A14E00218C2B1300909F3A /* AppDelegate.m in Sources */,
 				75A14E32218C340A00909F3A /* DelegateView.m in Sources */,
 				75672B962243654800299059 /* BInstance.m in Sources */,
+				75F1C721225208D80052D423 /* NSObject+InvokeOriginalMethod.m in Sources */,
 				75672B90224364C000299059 /* BaseInstance.m in Sources */,
 				75672B932243653200299059 /* AInstance.m in Sources */,
 			);

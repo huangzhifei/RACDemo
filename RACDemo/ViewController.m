@@ -32,10 +32,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    //    NSMutableArray *temp = [NSMutableArray arrayWithArray:nil];
-
-    //    NSLog(@"temp: %@", temp);
+    self.view.tag = 3;
+    NSLog(@"ViewController %@", NSStringFromSelector(_cmd));
 
     NSString *str1 = @"=xxxxx";
     str1 = [str1 stringByReplacingOccurrencesOfString:@"(null)=" withString:@""];
