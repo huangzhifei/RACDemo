@@ -10,6 +10,7 @@ target "RACDemo" do
   pod 'SDWebImage'
   pod 'HZFGCDTimer'
   pod 'AFNetworking'
+  pod 'Texture'
   
 end
 

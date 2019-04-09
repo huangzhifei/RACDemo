@@ -15,30 +15,74 @@ PODS:
   - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
   - HZFGCDTimer (0.0.3)
+  - PINCache (3.0.1-beta.6):
+    - PINCache/Arc-exception-safe (= 3.0.1-beta.6)
+    - PINCache/Core (= 3.0.1-beta.6)
+  - PINCache/Arc-exception-safe (3.0.1-beta.6):
+    - PINCache/Core
+  - PINCache/Core (3.0.1-beta.6):
+    - PINOperation (~> 1.1.0)
+  - PINOperation (1.1.1)
+  - PINRemoteImage/Core (3.0.0-beta.13):
+    - PINOperation
+  - PINRemoteImage/iOS (3.0.0-beta.13):
+    - PINRemoteImage/Core
+  - PINRemoteImage/PINCache (3.0.0-beta.13):
+    - PINCache (= 3.0.1-beta.6)
+    - PINRemoteImage/Core
   - ReactiveObjC (3.1.0)
-  - SDWebImage (4.4.6):
-    - SDWebImage/Core (= 4.4.6)
-  - SDWebImage/Core (4.4.6)
+  - SDWebImage (5.0.0):
+    - SDWebImage/Core (= 5.0.0)
+  - SDWebImage/Core (5.0.0)
+  - Texture (2.8):
+    - Texture/AssetsLibrary (= 2.8)
+    - Texture/Core (= 2.8)
+    - Texture/MapKit (= 2.8)
+    - Texture/Photos (= 2.8)
+    - Texture/PINRemoteImage (= 2.8)
+    - Texture/Video (= 2.8)
+  - Texture/AssetsLibrary (2.8):
+    - Texture/Core
+  - Texture/Core (2.8)
+  - Texture/MapKit (2.8):
+    - Texture/Core
+  - Texture/Photos (2.8):
+    - Texture/Core
+  - Texture/PINRemoteImage (2.8):
+    - PINRemoteImage/iOS (= 3.0.0-beta.13)
+    - PINRemoteImage/PINCache
+    - Texture/Core
+  - Texture/Video (2.8):
+    - Texture/Core
 
 DEPENDENCIES:
   - AFNetworking
   - HZFGCDTimer
   - ReactiveObjC (~> 3.1.0)
   - SDWebImage
+  - Texture
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - AFNetworking
     - HZFGCDTimer
+    - PINCache
+    - PINOperation
+    - PINRemoteImage
     - ReactiveObjC
     - SDWebImage
+    - Texture
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   HZFGCDTimer: f28ad4058fab0ebaa9f350fb7b2c7a4d84ba3078
+  PINCache: d195fdba255283f7e9900a55e3cced377f431f9b
+  PINOperation: a6219e6fc9db9c269eb7a7b871ac193bcf400aac
+  PINRemoteImage: d6d51c5d2adda55f1ce30c96e850b6c4ebd2856a
   ReactiveObjC: 2a38ea15335de4119d8b17caf1db1484f61db902
-  SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
+  SDWebImage: 5de80a0302de9e377e62f47d2fa1304efff0e55f
+  Texture: fc6e0157201f3a6e503d364c147b1872e365cef4
 
-PODFILE CHECKSUM: cfcc690b4ec878b7a20ee040a16b53ca561815a5
+PODFILE CHECKSUM: 2bfc3c3a03b4a416dd1835db38a520a4356ba52a
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.1
